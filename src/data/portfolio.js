@@ -19,10 +19,27 @@ export const PORFOLIO_DATA = {
   ],
   projects: [
     {
-      title: "Portfolio Website",
+      title: "SwiftShare",
+      description: "A decentralized real-time collaborative text editor powered by Yjs CRDTs, enabling conflict-free concurrent editing with sub-100ms sync latency. Features a custom WebSocket server, two-tiered MongoDB + in-memory persistence, and a premium minimalist UI with glassmorphism effects.",
+      techStack: ["React", "Node.js", "Yjs", "WebSocket", "MongoDB", "Tailwind CSS", "Docker", "UploadThing"],
+      link: "swiftshare.in",
+      github: "https://www.swiftshare.in/moreinfo/about#open-source",
+      image: "/swiftshare.png"
+    },
+    {
+      title: "Portfolio",
+      description: "A modern, performance-optimized portfolio featuring a dynamic hex grid background with comet animations, smooth View Transition theme toggling, and Lenis smooth scrolling. Built with a focus on GPU-accelerated rendering and mobile performance.",
+      techStack: ["React", "Vite", "Tailwind CSS", "Canvas API", "View Transitions API", "Lenis"],
+      link: "ishan-siddhartha.vercel.app",
+      github: "https://github.com/Trainer-Blue/new-portfolio",
+      image: "/new_portfolio.png"
+    },
+    {
+      title: "Old Portfolio",
       description: "A modern, responsive personal portfolio website built from scratch to showcase my projects, skills, and experience. Features a clean, dark-themed design with interactive elements and smooth scrolling.",
       techStack: ["React", "JavaScript", "Tailwind CSS", "Styled Components", "Material UI"],
       link: "https://ishan-siddhartha.vercel.app/",
+      github: "https://github.com/Trainer-Blue/portfolio",
       image: "/portfolio-screenshot.jpg" 
     },
     {
@@ -30,6 +47,7 @@ export const PORFOLIO_DATA = {
       description: "An intelligent web application that transforms PDF documents into AI-generated summaries using advanced language models. Features secure authentication, real-time processing, and interactive document viewing with support for files up to 20MB.",
       techStack: ["Next.js", "TypeScript", "React", "PostgreSQL", "Google Gemini", "LangChain", "Tailwind CSS", "Clerk Auth"],
       link: "https://lexispdf.vercel.app",
+      github: "https://github.com/Trainer-Blue/lexis",
       image: "/lexis-screenshot.png"
     },
     {
@@ -37,6 +55,7 @@ export const PORFOLIO_DATA = {
       description: "A responsive and accessible landing page for a real-world neuropsychological rehabilitation center, optimized for cross-device user experience with clean UI/UX structure and dynamic service sections.",
       techStack: ["Next.js", "React", "TypeScript", "Tailwind CSS", "EmailJS"],
       link: "https://samvedna.vercel.app",
+      github: "",
       image: "/samvedna-screenshot.png"
     }
   ],

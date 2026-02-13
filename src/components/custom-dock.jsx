@@ -1,6 +1,6 @@
 
 import React from "react"
-import { CalendarIcon, HomeIcon, MailIcon, PencilIcon, SunIcon, MoonIcon } from "lucide-react"
+import { CalendarIcon, HomeIcon, MailIcon, PencilIcon, SunIcon, MoonIcon, FileTextIcon } from "lucide-react"
 import { useTheme } from "@/components/theme-provider"
 
 import { cn } from "@/lib/utils"
@@ -85,6 +85,11 @@ const DATA = {
         url: "mailto:ishansiddhartha@gmail.com",
         icon: Icons.email,
       },
+      Resume: {
+        name: "Resume",
+        url: "https://drive.google.com/file/d/1S4JSxiJ2k5b-qNZPecJstGefQfsbow1h/view",
+        icon: (props) => <FileTextIcon {...props} />,
+      },
     },
   },
 }
@@ -123,6 +128,8 @@ export function CustomDock() {
                 <TooltipTrigger asChild>
                   <a
                     href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     aria-label={social.name}
                     className={cn(
                       buttonVariants({ variant: "ghost", size: "icon" }),

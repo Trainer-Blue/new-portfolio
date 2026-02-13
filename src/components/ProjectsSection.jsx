@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { GlobeIcon } from "lucide-react";
+import { GlobeIcon, GithubIcon } from "lucide-react";
 import Markdown from "react-markdown";
 
 export const ProjectsSection = () => {
@@ -32,14 +32,13 @@ export const ProjectsSection = () => {
                 <img
                   src={project.image}
                   alt={project.title}
-                  className="h-40 w-full overflow-hidden object-cover object-top"
+                  className="w-full overflow-hidden object-cover object-top aspect-video"
                 />
               )}
             </a>
             <CardHeader className="px-2">
               <div className="space-y-1">
                 <CardTitle className="mt-1 text-base">{project.title}</CardTitle>
-                <time className="font-sans text-xs">2024 - Present</time>
                 <div className="prose max-w-full text-pretty font-sans text-xs text-muted-foreground dark:prose-invert">
                   <Markdown>{project.description}</Markdown>
                 </div>
@@ -60,13 +59,23 @@ export const ProjectsSection = () => {
                 </div>
               )}
             </CardContent>
-            <CardFooter className="px-2 pb-2">
-              <a href={project.link} target="_blank" rel="noopener noreferrer">
-                <Badge className="flex gap-2 px-2 py-1 text-[10px]">
-                  <GlobeIcon className="size-3" />
-                  Website
-                </Badge>
-              </a>
+            <CardFooter className="px-2 pb-2 gap-2">
+              {project.link && (
+                <a href={project.link} target="_blank" rel="noopener noreferrer">
+                  <Badge className="flex gap-2 px-2 py-1 text-[10px]">
+                    <GlobeIcon className="size-3" />
+                    Website
+                  </Badge>
+                </a>
+              )}
+              {project.github && (
+                <a href={project.github} target="_blank" rel="noopener noreferrer">
+                  <Badge className="flex gap-2 px-2 py-1 text-[10px]">
+                    <GithubIcon className="size-3" />
+                    Source
+                  </Badge>
+                </a>
+              )}
             </CardFooter>
           </Card>
         ))}
