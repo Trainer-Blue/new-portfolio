@@ -80,11 +80,11 @@ const DATA = {
         url: "https://x.com/blue_sophist",
         icon: Icons.x,
       },
-      Email: {
-        name: "Send Email",
-        url: "mailto:ishansiddhartha@gmail.com",
-        icon: Icons.email,
-      },
+      // Email: {
+      //   name: "Send Email",
+      //   url: "mailto:ishansiddhartha@gmail.com",
+      //   icon: Icons.email,
+      // },
       Resume: {
         name: "Resume",
         url: "https://drive.google.com/file/d/1S4JSxiJ2k5b-qNZPecJstGefQfsbow1h/view",
