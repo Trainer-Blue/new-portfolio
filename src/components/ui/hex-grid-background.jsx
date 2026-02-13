@@ -2,20 +2,7 @@
 import React, { useEffect, useRef } from "react";
 import { useTheme } from "../theme-provider";
 
-/**
- * HexTechBackground
- *
- * A high-performance tech background using HTML5 Canvas.
- * - Background: "Falling Comets" (diagonal glowing lines).
- * - Foreground: Static black hexagon grid with gaps.
- * - Effect: The glow "peeks" through the cracks between hexagons.
- *
- * Optimizations:
- * - Decoupled rendering: Two separate canvases.
- *   1. bgCanvas: Draws the animated comets. Blurred via CSS (GPU).
- *   2. gridCanvas: Draws the static hexagon grid once at z-index 1.
- * - Removed per-frame Canvas API filter/shadowBlur calls (extremely expensive).
- */
+
 const HexTechBackground = ({
   className,
   hexSize = 20,
@@ -23,7 +10,7 @@ const HexTechBackground = ({
 
   // Comet properties
   lineCount = 25,
-  speed = 1.0, // General speed multiplier
+  speed = 0.2,
   minLength = 100,
   maxLength = 1000,
 }) => {
@@ -32,78 +19,81 @@ const HexTechBackground = ({
   const containerRef = useRef(null);
   const { theme } = useTheme();
   const themeRef = useRef(theme);
+  // Cached theme boolean — avoids matchMedia calls in animation loop
+  const isDarkRef = useRef(false);
 
-  // Update theme ref whenever theme changes
+  // Resolve and cache theme whenever it changes
   useEffect(() => {
     themeRef.current = theme;
+    const resolved =
+      theme === "system"
+        ? window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light"
+        : theme;
+    isDarkRef.current = resolved === "dark";
   }, [theme]);
 
-  // 1. Static Grid Layer
+  // 1. Static Grid Layer — createPattern, alpha: false
   useEffect(() => {
     const canvas = gridCanvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
 
+    // alpha: false — grid is bottom-most, no transparency needed
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
-    // Create hexagon path once
-    const createHexagonPath = (size) => {
-      const path = new Path2D();
-      for (let i = 0; i < 6; i++) {
-        const angle = (Math.PI / 3) * i + Math.PI / 6;
-        const px = size * Math.cos(angle);
-        const py = size * Math.sin(angle);
-        if (i === 0) path.moveTo(px, py);
-        else path.lineTo(px, py);
-      }
-      path.closePath();
-      return path;
-    };
-
     const renderGrid = (width, height) => {
       ctx.clearRect(0, 0, width, height);
-
-      // Use theme-aware colors: dark mode = dark hex, light mode = light hex
-      const resolvedTheme =
-        theme === "system"
-          ? window.matchMedia("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light"
-          : theme;
-      const isDark = resolvedTheme === "dark";
-      ctx.fillStyle = isDark ? "#1f1f1fff" : "#f0f0f0ff";
+      const isDark = isDarkRef.current;
+      const hexColor = isDark ? "#0A0A0A" : "#f0f0f0";
 
       const gridR = hexSize + gap;
       const xStep = Math.sqrt(3) * gridR;
       const yStep = 1.5 * gridR;
 
-      const cols = Math.ceil(width / xStep) + 2;
-      const rows = Math.ceil(height / yStep) + 2;
+      // Single tile with 2 hex positions, tiled via createPattern
+      const tileW = xStep;
+      const tileH = yStep * 2;
 
-      const hexPath = createHexagonPath(hexSize);
+      const tileCanvas = document.createElement("canvas");
+      tileCanvas.width = Math.ceil(tileW);
+      tileCanvas.height = Math.ceil(tileH);
+      const tileCtx = tileCanvas.getContext("2d");
 
-      for (let row = -1; row < rows; row++) {
-        for (let col = -1; col < cols; col++) {
-          const xOffset = row % 2 !== 0 ? xStep / 2 : 0;
-          const x = col * xStep + xOffset;
-          const y = row * yStep;
-          
-          ctx.translate(x, y);
-          ctx.fill(hexPath);
-          ctx.translate(-x, -y);
+      tileCtx.fillStyle = hexColor;
+
+      const drawHex = (cx, cy) => {
+        tileCtx.beginPath();
+        for (let i = 0; i < 6; i++) {
+          const a = (Math.PI / 3) * i + Math.PI / 6;
+          const px = cx + hexSize * Math.cos(a);
+          const py = cy + hexSize * Math.sin(a);
+          if (i === 0) tileCtx.moveTo(px | 0, py | 0);
+          else tileCtx.lineTo(px | 0, py | 0);
         }
-      }
+        tileCtx.closePath();
+        tileCtx.fill();
+      };
+
+      drawHex(tileW / 2, 0);
+      drawHex(tileW / 2, tileH);
+      drawHex(0, yStep);
+      drawHex(tileW, yStep);
+
+      const pattern = ctx.createPattern(tileCanvas, "repeat");
+      ctx.fillStyle = pattern;
+      ctx.fillRect(0, 0, width, height);
     };
 
     const resize = () => {
       const { width, height } = container.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       canvas.width = width * dpr;
       canvas.height = height * dpr;
       ctx.scale(dpr, dpr);
-      // Remove inline style setting for width/height as it's handled by className/Tailwind
-      
+
       renderGrid(width * dpr, height * dpr);
     };
 
@@ -116,7 +106,7 @@ const HexTechBackground = ({
     };
   }, [hexSize, gap, theme]);
 
-  // 2. Animated Background Layer (Comets)
+  // 2. Animated Comets — pre-rendered sprites, integer coords
   useEffect(() => {
     const canvas = bgCanvasRef.current;
     const container = containerRef.current;
@@ -132,25 +122,60 @@ const HexTechBackground = ({
     const dx = Math.cos(angle);
     const dy = Math.sin(angle);
 
+    // Pre-render a comet sprite for the given color, length, and width
+    const createSprite = (color, length, width) => {
+      const r = width / 2;
+      // Sprite canvas: big enough for tail→head at 45°
+      const extentX = dx * length + r;
+      const extentY = dy * length + r;
+      const pad = 2;
+      const spriteW = Math.ceil(extentX + r + pad);
+      const spriteH = Math.ceil(extentY + r + pad);
+      const spriteCanvas = document.createElement("canvas");
+      spriteCanvas.width = spriteW;
+      spriteCanvas.height = spriteH;
+      const sCtx = spriteCanvas.getContext("2d");
+
+      // Head at bottom-right, tail trails to upper-left
+      const headX = spriteW - r - 1;
+      const headY = spriteH - r - 1;
+      const tailX = headX - dx * length;
+      const tailY = headY - dy * length;
+
+      const gradient = sCtx.createLinearGradient(headX, headY, tailX, tailY);
+      gradient.addColorStop(0, color);
+      gradient.addColorStop(1, "transparent");
+
+      sCtx.fillStyle = gradient;
+      sCtx.beginPath();
+      sCtx.arc(headX, headY, r, angle - Math.PI / 2, angle + Math.PI / 2);
+      sCtx.lineTo(tailX, tailY);
+      sCtx.closePath();
+      sCtx.fill();
+
+      // Store head offset within sprite so drawImage can align correctly
+      spriteCanvas._headOffsetX = spriteW - r - 1;
+      spriteCanvas._headOffsetY = spriteH - r - 1;
+
+      return spriteCanvas;
+    };
+
     const createItem = (w, h) => {
-      // Check current theme for trail colors
-      const resolvedTheme =
-        themeRef.current === "system"
-          ? window.matchMedia("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light"
-          : themeRef.current;
-      const isDark = resolvedTheme === "dark";
+      const isDark = isDarkRef.current;
+      const color = isDark
+        ? `hsl(${Math.random() * 40 + 10}, 90%, 60%)`
+        : `hsl(0, 0%, ${Math.random() * 5}%)`;
+      const length = minLength + Math.random() * (maxLength - minLength);
+      const width = Math.random() * 20 + 10;
 
       return {
         x: Math.random() * (w + h) - h,
         y: Math.random() * (h + w) - w,
         speed: (Math.random() * 0.5 + 0.5) * speed * 2,
-        length: minLength + Math.random() * (maxLength - minLength),
-        width: Math.random() * 5 + 10,
-        color: !isDark
-          ? `hsl(0, 0%, ${Math.random() * 5}%)` // Dark mode: black/very dark gray (0-5%)
-          : `hsl(${Math.random() * 40 + 10}, 90%, 60%)`, // Light mode: colorful yellow/orange
+        length,
+        width,
+        color,
+        sprite: createSprite(color, length, width),
       };
     };
 
@@ -185,28 +210,13 @@ const HexTechBackground = ({
       const w = canvas.width;
       const h = canvas.height;
 
-      // Clear with transparency
       ctx.clearRect(0, 0, w, h);
 
       items.forEach((item) => {
-        const headX = item.x;
-        const headY = item.y;
-        const tailX = item.x - dx * item.length;
-        const tailY = item.y - dy * item.length;
-
-        const r = item.width / 2;
-
-        const gradient = ctx.createLinearGradient(headX, headY, tailX, tailY);
-        gradient.addColorStop(0, item.color);
-        gradient.addColorStop(1, "transparent");
-
-        ctx.fillStyle = gradient;
-
-        ctx.beginPath();
-        ctx.arc(headX, headY, r, angle - Math.PI / 2, angle + Math.PI / 2);
-        ctx.lineTo(tailX, tailY);
-        ctx.closePath();
-        ctx.fill();
+        // Offset so sprite head aligns with item.x, item.y
+        const drawX = (item.x - item.sprite._headOffsetX) | 0;
+        const drawY = (item.y - item.sprite._headOffsetY) | 0;
+        ctx.drawImage(item.sprite, drawX, drawY);
       });
 
       update(w, h);
@@ -215,11 +225,10 @@ const HexTechBackground = ({
 
     const resize = () => {
       const { width, height } = container.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       canvas.width = width * dpr;
       canvas.height = height * dpr;
       ctx.scale(dpr, dpr);
-      // Inline styles handled by Tailwind classes
 
       if (items.length === 0) initItems(width, height);
     };
@@ -240,19 +249,25 @@ const HexTechBackground = ({
   return (
     <div
       ref={containerRef}
-      className={`fixed top-0 left-0 w-full h-full z-0 ${className}`}
+      className={`absolute inset-0 z-0 overflow-hidden ${className}`}
     >
+      {/* Top gradient fade
+      <div className="absolute top-0 left-0 right-0 h-[10vh] z-5 pointer-events-none bg-gradient-to-b from-black dark:from-amber-500 to-transparent" />
+      
+      <div className="absolute bottom-0 left-0 right-0 h-[10vh] z-5 pointer-events-none bg-gradient-to-t from-black dark:from-amber-500 to-transparent" /> */}
+
       {/* Animated comets layer */}
       <canvas
         ref={bgCanvasRef}
         className="absolute inset-0 z-10 w-full h-full"
       />
 
-      {/* Foreground Layer: Static Hexagon Grid. Sharp. */}
+      {/* Foreground Layer: Static Hexagon Grid */}
       <canvas
         ref={gridCanvasRef}
         className="absolute inset-0 z-20 w-full h-full"
       />
+      <div className="absolute inset-0 z-30 w-full h-full backdrop-blur-[2px]" />
     </div>
   );
 };

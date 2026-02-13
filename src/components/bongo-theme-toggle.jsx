@@ -1,15 +1,22 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { flushSync } from "react-dom";
 import { useTheme } from "@/components/theme-provider";
 import { Sun, Moon } from "lucide-react";
 import styles from "./ThreeDButton.module.css";
 
-export function BongoThemeToggle({ scale = 0.5 }) {
+export function BongoThemeToggle({ scale = 0.5, staticPosition = false }) {
   const { theme, setTheme } = useTheme();
   const [isPressing, setIsPressing] = useState(false);
 
+  const buttonRef = useRef(null);
 
-  const handleThemeToggle = (event) => {
+  const handleThemeToggle = async () => {
+    // Prevent double-clicks
+    if (document.startViewTransition && document.documentElement.dataset.transitioning) return;
+    
+    // Haptics
+    if (navigator.vibrate) navigator.vibrate(10);
+
     const newTheme = theme === "dark" ? "light" : "dark";
 
     // Trigger paw press animation
@@ -24,43 +31,54 @@ export function BongoThemeToggle({ scale = 0.5 }) {
       return;
     }
 
-    // Get click coordinates
-    const x = event.clientX;
-    const y = event.clientY;
+    // Mark transitioning state
+    document.documentElement.dataset.transitioning = "true";
 
-    // Calculate the radius needed to cover the entire screen from click point
+    // Hint browser to promote layer
+    document.documentElement.style.willChange = "clip-path";
+
+    await document.startViewTransition(() => {
+      flushSync(() => {
+        setTheme(newTheme);
+      });
+    }).ready;
+
+    // Get button center coordinates (standardized per user request)
+    const rect = buttonRef.current.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+
     const endRadius = Math.hypot(
       Math.max(x, window.innerWidth - x),
       Math.max(y, window.innerHeight - y)
     );
 
-    // Start view transition
-    const transition = document.startViewTransition(() => {
-      flushSync(() => {
-        setTheme(newTheme);
-      });
-    });
+    const animation = document.documentElement.animate(
+      {
+        clipPath: [
+          `circle(0px at ${x}px ${y}px)`,
+          `circle(${endRadius}px at ${x}px ${y}px)`,
+        ],
+      },
+      {
+        duration: 1000,
+        easing: "cubic-bezier(0.4, 0, 0.2, 1)", // Material Design standard motion
+        pseudoElement: "::view-transition-new(root)",
+      }
+    );
 
-    // Animate the ripple effect when transition is ready
-    transition.ready.then(() => {
-      document.documentElement.animate(
-        {
-          clipPath: [
-            `circle(0px at ${x}px ${y}px)`,
-            `circle(${endRadius}px at ${x}px ${y}px)`,
-          ],
-        },
-        {
-          duration: 500,
-          easing: "ease-in-out",
-          pseudoElement: "::view-transition-new(root)",
-        }
-      );
+    animation.finished.finally(() => {
+      document.documentElement.dataset.transitioning = "";
+      document.documentElement.style.willChange = "";
     });
   };
 
+  const containerClasses = staticPosition 
+    ? "relative w-[140px] h-[80px] flex items-center justify-center mt-7 scale-80 md:scale-100 z-10 mx-auto"
+    : "fixed bottom-4 right-4 z-50 origin-bottom-right scale-[0.6] md:bottom-8 md:right-8 md:scale-100 transition-all duration-300 pointer-events-none";
+
   return (
-    <div className="fixed bottom-4 right-4 z-50 origin-bottom-right scale-[0.6] md:bottom-8 md:right-8 md:scale-100 transition-all duration-300 pointer-events-none">
+    <div className={containerClasses}>
       {/* Container for Cat - Absolute positioning relative to the fixed anchor */}
       <div
         className="absolute bottom-[-79px] right-[-80px] w-[800px] h-[450px] origin-bottom-right pointer-events-none z-20"
@@ -116,6 +134,7 @@ export function BongoThemeToggle({ scale = 0.5 }) {
       {/* Theme Toggle Button - 3D design */}
       <div className="absolute bottom-0 right-0 pointer-events-auto z-10">
         <button
+          ref={buttonRef}
           onClick={handleThemeToggle}
           className={styles.button}
           type="button"

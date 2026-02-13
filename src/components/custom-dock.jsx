@@ -1,6 +1,7 @@
 
 import React from "react"
-import { CalendarIcon, HomeIcon, MailIcon, PencilIcon } from "lucide-react"
+import { CalendarIcon, HomeIcon, MailIcon, PencilIcon, SunIcon, MoonIcon } from "lucide-react"
+import { useTheme } from "@/components/theme-provider"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
@@ -79,7 +80,7 @@ const DATA = {
         url: "https://x.com/blue_sophist",
         icon: Icons.x,
       },
-      email: {
+      Email: {
         name: "Send Email",
         url: "mailto:ishansiddhartha@gmail.com",
         icon: Icons.email,
@@ -89,6 +90,7 @@ const DATA = {
 }
 
 export function CustomDock() {
+  const { theme, setTheme } = useTheme();
   return (
     <div className="flex flex-col items-center justify-center">
       <TooltipProvider>
@@ -136,6 +138,28 @@ export function CustomDock() {
               </Tooltip>
             </DockIcon>
           ))}
+          <Separator orientation="vertical" className="h-full py-2" />
+          <DockIcon>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  className={cn(
+                    buttonVariants({ variant: "ghost", size: "icon" }),
+                    "size-12 rounded-full text-black dark:text-white cursor-pointer"
+                  )}
+                  aria-label="Toggle theme"
+                >
+                  <SunIcon className="size-5 hidden dark:block" />
+                  <MoonIcon className="size-5 block dark:hidden" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Theme</p>
+              </TooltipContent>
+            </Tooltip>
+          </DockIcon>
         </Dock>
       </TooltipProvider>
     </div>
