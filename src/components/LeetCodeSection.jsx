@@ -123,7 +123,7 @@ export const LeetCodeSection = () => {
                         blockSize={13}
                         blockMargin={4}
                         fontSize={14}
-                        hideColorLegend={true}
+                        showColorLegend={true}
                         showTotalCount={false}
                         labels={LABELS}
                         style={calendarStyle}

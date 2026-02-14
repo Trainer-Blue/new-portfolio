@@ -16,8 +16,8 @@ export const GitHubSection = () => {
             blockSize={13}
             blockMargin={4}
             fontSize={14}
-            hideColorLegend={true}
-            hideTotalCount={true}
+            showColorLegend={true}
+            showTotalCount={true}
             labels={{
                 legend: {
                     less: null,
