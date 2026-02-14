@@ -15,6 +15,7 @@ const LeetCodeSection = lazy(() => import("@/components/LeetCodeSection"));
 const ProjectsSection = lazy(() => import("@/components/ProjectsSection"));
 const GitHubSection = lazy(() => import("@/components/GitHubSection"));
 const ContactSection = lazy(() => import("@/components/ContactSection"));
+const Footer = lazy(() => import("@/components/Footer"));
 
 function App() {
   useEffect(() => {
@@ -50,6 +51,7 @@ function App() {
               <BongoThemeToggle staticPosition />
             </div>
             <ContactSection />
+            <Footer />
           </Suspense>
         </div>
       </div>

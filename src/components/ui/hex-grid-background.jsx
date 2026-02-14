@@ -47,7 +47,7 @@ const HexTechBackground = ({
     const renderGrid = (width, height) => {
       ctx.clearRect(0, 0, width, height);
       const isDark = isDarkRef.current;
-      const hexColor = isDark ? "#0A0A0A" : "#f0f0f0";
+      const hexColor = isDark ? "#0B0B0B" : "#f0f0f0";
 
       const gridR = hexSize + gap;
       const xStep = Math.sqrt(3) * gridR;
