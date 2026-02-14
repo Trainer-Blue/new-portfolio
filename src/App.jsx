@@ -1,13 +1,20 @@
+import { useEffect, Suspense, lazy } from "react";
+import Lenis from "lenis";
+
 import HexTechBackground from "@/components/ui/hex-grid-background";
 import { BongoThemeToggle } from "@/components/bongo-theme-toggle";
 import { CustomDock } from "@/components/custom-dock";
+
+// Keep Hero eager for LCP
 import { HeroSection } from "@/components/HeroSection";
-import { EducationSection } from "@/components/EducationSection";
-import { SkillsSection } from "@/components/SkillsSection";
-import { ProjectsSection } from "@/components/ProjectsSection";
-import { ContactSection } from "@/components/ContactSection";
-import Lenis from "lenis";
-import { useEffect } from "react";
+
+// Lazy load below-the-fold content
+const EducationSection = lazy(() => import("@/components/EducationSection"));
+const SkillsSection = lazy(() => import("@/components/SkillsSection"));
+const LeetCodeSection = lazy(() => import("@/components/LeetCodeSection"));
+const ProjectsSection = lazy(() => import("@/components/ProjectsSection"));
+const GitHubSection = lazy(() => import("@/components/GitHubSection"));
+const ContactSection = lazy(() => import("@/components/ContactSection"));
 
 function App() {
   useEffect(() => {
@@ -27,19 +34,23 @@ function App() {
     return () => lenis.destroy();
   }, []);
   return (
-    <div className="relative min-h-screen transition-all duration-500 ease-in-out">
+    <div className="relative min-h-screen">
       <HexTechBackground className="pointer-events-none" />
       
       <div className="relative z-10 w-full max-w-[760px] mx-auto px-3 md:px-4 py-12 md:py-20 pb-28 md:pb-32">
         <div className="rounded-xl p-4 md:p-8 flex flex-col gap-8 md:gap-10">
           <HeroSection />
-          <EducationSection />
-          <SkillsSection />
-          <ProjectsSection />
-          <div className="flex justify-center py-4">
-            <BongoThemeToggle staticPosition />
-          </div>
-          <ContactSection />
+          <Suspense fallback={<div className="min-h-[200px]" />}>
+            <EducationSection />
+            <SkillsSection />
+            <LeetCodeSection />
+            <ProjectsSection />
+            <GitHubSection />
+            <div className="flex justify-center py-4">
+              <BongoThemeToggle staticPosition />
+            </div>
+            <ContactSection />
+          </Suspense>
         </div>
       </div>
       

@@ -22,7 +22,7 @@ export const PORFOLIO_DATA = {
       title: "SwiftShare",
       description: "A decentralized real-time collaborative text editor powered by Yjs CRDTs, enabling conflict-free concurrent editing with sub-100ms sync latency. Features a custom WebSocket server, two-tiered MongoDB + in-memory persistence, and a premium minimalist UI with glassmorphism effects.",
       techStack: ["React", "Node.js", "Yjs", "WebSocket", "MongoDB", "Tailwind CSS", "Docker", "UploadThing"],
-      link: "swiftshare.in",
+      link: "https://swiftshare.in",
       github: "https://www.swiftshare.in/moreinfo/about#open-source",
       image: "/swiftshare.png"
     },
@@ -30,7 +30,7 @@ export const PORFOLIO_DATA = {
       title: "Portfolio",
       description: "A modern, minimalistic portfolio with a dynamic hex grid background with comet animations(check github for component), smooth View Transition theme toggling, and Lenis smooth scrolling. Built with a focus on GPU-accelerated rendering and mobile performance, also cat theme toggle 😺",
       techStack: ["React", "Vite", "Tailwind CSS", "Canvas API", "View Transitions API", "Lenis"],
-      link: "ishan-siddhartha.vercel.app",
+      link: "https://ishan-siddhartha.vercel.app",
       github: "https://github.com/Trainer-Blue/new-portfolio",
       image: "/new_portfolio.png"
     },

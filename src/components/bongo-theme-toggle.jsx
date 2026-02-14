@@ -7,6 +7,7 @@ import styles from "./ThreeDButton.module.css";
 export function BongoThemeToggle({ scale = 0.5, staticPosition = false }) {
   const { theme, setTheme } = useTheme();
   const [isPressing, setIsPressing] = useState(false);
+  const [isButtonHeld, setIsButtonHeld] = useState(false);
 
   const buttonRef = useRef(null);
 
@@ -19,17 +20,29 @@ export function BongoThemeToggle({ scale = 0.5, staticPosition = false }) {
 
     const newTheme = theme === "dark" ? "light" : "dark";
 
-    // Trigger paw press animation
+    // 1. Paw moves down START
     setIsPressing(true);
-    setTimeout(() => {
-      setIsPressing(false);
-    }, 200);
 
-    // Fallback for browsers that don't support View Transitions API
+    // 2. Short delay for paw to "reach" the button (visual sync)
+    // Assuming paw animation/transition takes ~50-100ms
+    await new Promise(resolve => setTimeout(resolve, 50)); 
+    setIsButtonHeld(true); // Button presses DOWN
+
+    // 3. Hold for a moment
+    await new Promise(resolve => setTimeout(resolve, 150));
+
+    // 4. Release both (Paw lifts, Button springs up)
+    setIsButtonHeld(false);
+    setIsPressing(false);
+
+    // Run transition concurrently (no await)
     if (!document.startViewTransition) {
       setTheme(newTheme);
       return;
     }
+
+    // Enable performance mode
+    document.body.classList.add('is-transitioning');
 
     // Mark transitioning state
     document.documentElement.dataset.transitioning = "true";
@@ -61,7 +74,7 @@ export function BongoThemeToggle({ scale = 0.5, staticPosition = false }) {
         ],
       },
       {
-        duration: 1000,
+        duration: 700, 
         easing: "cubic-bezier(0.4, 0, 0.2, 1)", // Material Design standard motion
         pseudoElement: "::view-transition-new(root)",
       }
@@ -70,6 +83,7 @@ export function BongoThemeToggle({ scale = 0.5, staticPosition = false }) {
     animation.finished.finally(() => {
       document.documentElement.dataset.transitioning = "";
       document.documentElement.style.willChange = "";
+      document.body.classList.remove('is-transitioning');
     });
   };
 
@@ -83,7 +97,9 @@ export function BongoThemeToggle({ scale = 0.5, staticPosition = false }) {
       <div
         className="absolute bottom-[-79px] right-[-80px] w-[800px] h-[450px] origin-bottom-right pointer-events-none z-20"
         style={{
-          transform: `scale(${scale})`,
+          transform: `scale(${scale}) translateZ(0)`, // Force GPU acceleration
+          backfaceVisibility: "hidden",
+          willChange: "transform", // Ensure browser optimizes for transform changes (zoom/scale)
         }}
       >
         {/* Cat Head */}
@@ -136,7 +152,7 @@ export function BongoThemeToggle({ scale = 0.5, staticPosition = false }) {
         <button
           ref={buttonRef}
           onClick={handleThemeToggle}
-          className={styles.button}
+          className={`${styles.button} ${isButtonHeld ? styles.pressed : ''}`}
           type="button"
           aria-label="Toggle theme"
           data-theme={theme}

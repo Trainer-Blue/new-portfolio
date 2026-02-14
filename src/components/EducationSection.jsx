@@ -53,3 +53,5 @@ export const EducationSection = () => {
     </div>
   );
 };
+
+export default EducationSection;

@@ -16,7 +16,7 @@ import Markdown from "react-markdown";
 export const ProjectsSection = () => {
   const { projects } = PORFOLIO_DATA;
   return (
-    <div className="flex flex-col gap-y-3 pb-10">
+    <div className="flex flex-col gap-y-3">
       <h2 className="text-xl font-bold">Projects</h2>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 max-w-[800px] mx-auto">
         {projects.map((project) => (
@@ -32,6 +32,7 @@ export const ProjectsSection = () => {
                 <img
                   src={project.image}
                   alt={project.title}
+                  loading="lazy"
                   className="w-full overflow-hidden object-cover object-top aspect-video"
                 />
               )}
@@ -83,3 +84,5 @@ export const ProjectsSection = () => {
     </div>
   );
 };
+
+export default ProjectsSection;

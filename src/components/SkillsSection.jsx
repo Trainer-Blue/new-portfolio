@@ -16,6 +16,11 @@ const SKILLS = [
   { name: "CSS", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg" },
   { name: "Git", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg" },
   { name: "SQL", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg" },
+  { name: "Docker", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" },
+  { name: "Linux", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg" },
+  { name: "MongoDB", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg" },
+  { name: "Express", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/express/express-original.svg" },
+  { name: "PostgreSQL", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" },
 ];
 
 export const SkillsSection = () => {
@@ -25,11 +30,13 @@ export const SkillsSection = () => {
       <div className="flex flex-wrap gap-1">
         {SKILLS.map((skill) => (
           <Badge key={skill.name} variant="secondary" className="gap-1.5 py-1 px-2.5 border border-black dark:border-white">
-            <img
-              src={skill.icon}
-              alt={skill.name}
-              className="size-3.5"
-            />
+            {skill.icon && (
+              <img
+                src={skill.icon}
+                alt={skill.name}
+                className="size-3.5"
+              />
+            )}
             {skill.name}
           </Badge>
         ))}
@@ -37,3 +44,5 @@ export const SkillsSection = () => {
     </div>
   );
 };
+
+export default SkillsSection;

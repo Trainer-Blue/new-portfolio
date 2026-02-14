@@ -20,6 +20,28 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Hide scrollbar for Chrome, Safari and Opera */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.hide-scrollbar {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
+}
+
+/* Hide scrollbar specifically for react-activity-calendar container */
+.react-activity-calendar__scroll-container::-webkit-scrollbar {
+  display: none !important;
+}
+.react-activity-calendar__scroll-container {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -77,12 +99,6 @@ body {
   :root {
     color: #213547;
     background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
   }
 }
 
@@ -197,4 +213,22 @@ body {
 ::view-transition-old(root), ::view-transition-new(root) {
     animation: none;
     mix-blend-mode: normal;
+}
+
+/* remove scrolbar from every compoenent */
+::-webkit-scrollbar {
+    display: none;
+}
+
+/* Performance optimization during theme transition */
+.is-transitioning * {
+  transition: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  filter: none !important;
+  will-change: auto !important;
+  /* Keep layout stable but remove painting/compositing effects */
+}
+.is-transitioning {
+  cursor: wait;
 }
