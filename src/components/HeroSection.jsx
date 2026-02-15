@@ -50,7 +50,7 @@ export const HeroSection = () => {
             <span className="font-semibold text-foreground underline decoration-foreground/30 underline-offset-4">
               I just want it so bad
             </span>
-            {" "}and it's so fun to chase something you care about, to do things, to experience life to its utmost extent.
+            {" "}and it's so fun to chase something you care about, to explore and master various things, to experience life to its utmost extent.
           </p>
           <p>
             And along the way realized that finding something you're passionate about isn't about being born with "talent" or expertise. It's about{" "}
